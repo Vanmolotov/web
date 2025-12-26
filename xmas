@@ -1,0 +1,1318 @@
+<!-- =========================================================
+  MOLOTOV WHEEL + CHAT — ALWAYS ON + CHAT UNPINNED (VAN ERMOLIN)
+ 
+========================================================= -->
+
+<style>
+:root{
+  --font-main: Helvetica, Arial, sans-serif;
+
+  --chat-bg: #242424;
+  --chat-border: rgba(255,255,255,.10);
+  --chat-text: #f3f4f6;
+  --chat-msg-bg: #2e2e2e;
+
+  --chat-btn-bg: #D8FF00;
+  --chat-btn-text: #111;
+
+  --chat-maxw: 520px;
+  --chat-maxh: 70vh;
+  --chat-maxh-m: 380px;
+
+  --wheel-bg: transparent;
+  --wheel-border: 0px;
+  --wheel-border-color: rgba(0,0,0,0);
+  --wheel-shadow: none;
+
+  --wheel-item-bg: transparent;
+  --wheel-item-border: 0px;
+  --wheel-item-border-color: rgba(0,0,0,0);
+  --wheel-item-shadow: none;
+
+  --wheel-marker: #000;
+  --wheel-fade-left: #242424;
+  --wheel-fade-right: #242424;
+
+  --wheel-h: 300px;
+  --wheel-h-m: 160px;
+
+  --wheel-item-w: 200px;
+  --wheel-item-w-m: 92px;
+
+  --wheel-item-radius: 12px;
+  --wheel-item-radius-m: 0px;
+}
+
+.text_win,
+.text_win *{
+  font-family: var(--font-main) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== wheel ===== */
+.wheel_wrp{
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--wheel-bg) !important;
+  border: var(--wheel-border) solid var(--wheel-border-color) !important;
+  box-shadow: var(--wheel-shadow) !important;
+  height: var(--wheel-h);
+}
+.wheel_reel{
+  position: absolute; left: 0; top: 0; bottom: 0;
+  display: flex; align-items: center;
+  gap: 16px;
+  padding: 0 48%;
+}
+.wheel_item{
+  flex: 0 0 var(--wheel-item-w);
+  height: calc(100% - 32px);
+  margin: 16px 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: var(--wheel-item-radius);
+  background: var(--wheel-item-bg) !important;
+  border: var(--wheel-item-border) solid var(--wheel-item-border-color) !important;
+  box-shadow: var(--wheel-item-shadow) !important;
+  text-align: center;
+}
+.wheel_item img{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  aspect-ratio: auto !important;
+  object-fit: cover !important;
+  display:block !important;
+}
+.wheel_item .wheel_lbl{ display:none !important; }
+
+.wheel_wrp:after{
+  content:""; position:absolute; top:0; bottom:0; left:50%;
+  width:2px; background: var(--wheel-marker);
+  transform: translateX(-1px); z-index:5;
+}
+.wheel_wrp:before{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(90deg,
+    var(--wheel-fade-left) 0%,
+    rgba(238,238,238,0) 10%,
+    rgba(238,238,238,0) 90%,
+    var(--wheel-fade-right) 100%
+  );
+  pointer-events:none; z-index:4;
+}
+
+/* ===== form state ===== */
+.form_noactive{ opacity:0.4; pointer-events:none; }
+.wheel_form .t-input-subtitle, .wheel_form input.t-input{ text-align:center; }
+
+.present_text .tn-atom{
+  box-sizing: border-box !important;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+}
+
+/* ===== chat ===== */
+.text_win{
+  width: min(var(--chat-maxw), 100%);
+  max-height: var(--chat-maxh);
+  display: flex !important;
+  flex-direction: column !important;
+  background: var(--chat-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--chat-border);
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.03) inset;
+  overflow: hidden;
+  color: var(--chat-text);
+}
+.text_win .chat-head{ display:none !important; }
+
+.text_win .chat-body{
+  flex: 1 1 auto !important;
+  padding:16px 12px 12px;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  display:flex; flex-direction:column; gap:10px;
+}
+
+.chat-msg{
+  max-width: 92%;
+  padding: 10px 12px; border-radius: 12px;
+  font-size: 14px; line-height: 1.5;
+  background: var(--chat-msg-bg);
+  color: var(--chat-text);
+  border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.35);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.chat-msg.agent{ border-top-left-radius: 4px; }
+.chat-msg.agent.info{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18) !important; }
+.chat-msg.agent.decide{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16) !important; }
+.chat-msg.agent.warn{ background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.18) !important; }
+
+.chat-msg.prize-neon{
+  border-color: rgba(216,255,0,.80) !important;
+  box-shadow:
+    0 0 0 1px rgba(216,255,0,.25),
+    0 0 12px rgba(216,255,0,.35),
+    0 0 22px rgba(216,255,0,.18),
+    0 1px 2px rgba(0,0,0,.35) !important;
+}
+
+.chat-typing{ display:inline-flex; gap:6px; align-items:center; opacity:.85 }
+.chat-dot{ width:6px; height:6px; border-radius:50%; background:#c7c7c7; opacity:.4; animation: dot 1s infinite }
+.chat-dot:nth-child(2){ animation-delay:.2s } .chat-dot:nth-child(3){ animation-delay:.4s }
+@keyframes dot{ 0%{opacity:.2} 50%{opacity:1} 100%{opacity:.2} }
+
+@keyframes fadeInUp{ from{ opacity:0; transform: translateY(4px) } to{ opacity:1; transform: translateY(0) } }
+.chat-msg.fadein{ animation: fadeInUp var(--fade-ms,300ms) ease-out both; }
+
+/* footer sticky */
+.text_win .chat-foot{
+  position: sticky !important;
+  bottom: 0;
+  z-index: 5;
+  padding: 10px 12px;
+  display:flex;
+  flex-direction: row;
+  gap: 0;
+  align-items:flex-start;
+  justify-content:flex-start;
+  background: #242424;
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.text_win .chat-foot .btn{
+  width: 92% !important;
+  max-width: 92% !important;
+  align-self: flex-start !important;
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight:800;
+  font-size:14px;
+  letter-spacing:.2px;
+  border:1px solid rgba(255,255,255,.16);
+  cursor:pointer;
+  transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+  background: var(--chat-btn-bg);
+  color: var(--chat-btn-text);
+  box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  padding:0 16px;
+}
+.text_win .chat-foot .btn:active{ transform: translateY(1px) }
+.text_win .chat-foot .btn:disabled{ opacity:.5; cursor:not-allowed }
+
+.spin_wheel .tn-atom{
+  background:#D8FF00 !important;
+  color:#111 !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  font-family: var(--font-main) !important;
+}
+.t-btn-disabled{ opacity:.45 !important; filter: grayscale(1); }
+
+/* desktop promo */
+.passport{
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:10px !important;
+  align-items:stretch !important;
+  margin-top:12px !important;
+}
+.passport .lotto-pass__input,
+.passport .lotto-pass__btn{
+  width:100% !important;
+  box-sizing:border-box !important;
+  display:block !important;
+  font-family: var(--font-main) !important;
+}
+.passport .lotto-pass__input{
+  min-height:40px;
+  border-radius:10px;
+  padding:10px 12px;
+  background:#ffffff !important;
+  color:#111111 !important;
+  border:1px solid #000000 !important;
+  font-size:14px;
+  outline:none;
+}
+.passport .lotto-pass__input::placeholder{ color:#6b7280 !important; }
+.passport .lotto-pass__btn{
+  min-height:40px;
+  border-radius:10px;
+  padding:0 14px;
+  cursor:pointer;
+  font-weight:800;
+  font-size:14px;
+  background:#111 !important;
+  color:#fff !important;
+  border:1px solid rgba(0,0,0,.65) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.35);
+}
+.passport .lotto-pass__btn:hover{ filter:brightness(1.08); }
+
+/* mobile */
+@media (max-width:640px){
+  .wheel_wrp{ height: var(--wheel-h-m); }
+  .wheel_item{ flex-basis: var(--wheel-item-w-m); border-radius: var(--wheel-item-radius-m) !important; }
+  .wheel_reel{ gap:12px; }
+
+  .text_win{ width: 100%; max-height: var(--chat-maxh-m); }
+  .text_win .chat-body{ padding: 12px 10px 10px; gap: 8px; }
+  .text_win .chat-foot{ flex-direction: column; gap: 10px; align-items: flex-start; }
+  .text_win .chat-foot .btn{ width: 92% !important; max-width: 92% !important; }
+}
+
+/* mobile last 2 msgs */
+@media (max-width:640px){
+  .text_win .chat-body .chat-msg{ display:none !important; }
+  .text_win .chat-body .chat-msg:nth-last-child(-n+2){ display:block !important; }
+
+  /* typing по умолчанию скрываем, включаем только когда реально есть typing */
+  .text_win .chat-body .chat-typing-wrap{ display:none !important; }
+
+  .text_win .chat-body.has-typing .chat-msg{ display:none !important; }
+  .text_win .chat-body.has-typing .chat-msg:nth-last-child(2){ display:block !important; }
+  .text_win .chat-body.has-typing .chat-typing-wrap{ display:block !important; }
+}
+
+/* promo in chat only mobile */
+.text_win .chat-promo{ display:none; }
+@media (max-width:640px){
+  .text_win .chat-promo{
+    width:92%;
+    display:flex;
+    gap:8px;
+    align-items:stretch;
+  }
+  .text_win .chat-promo__input{
+    flex:1 1 auto;
+    min-height:44px;
+    border-radius:10px;
+    padding:0 12px;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:.2px;
+    border:1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.08);
+    color: var(--chat-text);
+    outline:none;
+  }
+  .text_win .chat-promo__input::placeholder{ color: rgba(243,244,246,.65); font-weight:700; }
+  .text_win .chat-promo__btn{
+    flex:0 0 auto;
+    min-height:44px;
+    border-radius:10px;
+    padding:0 14px;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:.2px;
+    border:1px solid rgba(255,255,255,.16);
+    cursor:pointer;
+    background: rgba(255,255,255,.10);
+    color: var(--chat-text);
+    box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  }
+  .text_win .chat-promo__btn:disabled{ opacity:.5; cursor:not-allowed; }
+}
+
+/* anti-tilda pin */
+.wh-chat-mount{
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 16px 0 0 !important;
+  transform: none !important;
+}
+.wh-chat-mount .text_win{
+  position: static !important;
+  inset: auto !important;
+  top: auto !important; right: auto !important; bottom: auto !important; left: auto !important;
+  transform: none !important;
+  will-change: auto !important;
+  margin: 18px 0 0 !important;
+}
+
+/* always on: hide open/close */
+.open-wheel,
+.close-wheel{ display:none !important; }
+</style>
+
+<script>
+$(document).ready(function(){
+
+/* =========================================================
+  [A] SETTINGS
+========================================================= */
+const DEFAULT_MAX_ATTEMPTS = 10000;
+const ATTEMPT_SCHEDULE = { /* '2025-10-25': 2 */ };
+
+const SHOW_EXHAUST_AFTER_SUBMIT = false;
+const SHOW_ALREADY_SENT_AFTER_SUCCESS = true;
+
+const TASKS_URL = 'https://example.com/tasks'; // <-- поставь свою страницу заданий
+
+const spinTime = 10; // сек (у тебя звук рулетки 9 сек — норм, он будет играть отдельно)
+const SPIN_EASE = 'cubic-bezier(.10,.92,.08,1)';
+
+const TYPING_MS = 1100;
+const GAP_AFTER_FIRST_MSG = 600;
+const FADE_MS = 260;
+
+const USE_OPTION_BG = false;
+
+const PROMO_SPIN_CODES = { 'TEST2': 2, 'BONUS3': 3 };
+const PROMO_RESET_CODES = { 'RESET777': true, 'RESTART': true, 'RESET11': true };
+
+const PROMO_RESET_LIMITS = {
+  'RESET777':  { mode:'daily', limit: 10 },
+  'RESTART': { mode:'daily', limit: 1 },
+  'RESET11': { mode:'daily', limit: 1 },
+};
+
+const SPIN_LOCK_TEXT_PAGE = 'Заявка отправлена';
+const SPIN_LOCK_TEXT_CHAT = 'Заявка отправлена';
+
+/* =========================================================
+  [A1] SOUND (новое)
+  Важно: GitHub "blob" ссылки НЕ играют. Нужны raw ссылки.
+  Я сразу подставил raw.
+========================================================= */
+const SOUND = {
+  // общий мастер-тумблер
+  enabled: true,
+
+  // включение/выключение отдельных событий
+  use: {
+    spinButton: true,       // нажатие "Крутить"
+    wheelSpin: true,        // звук прокрутки рулетки (9 сек)
+    chatMessage: true,      // входящее сообщение в чат
+    promoFail: true,        // неправильный промокод
+    formSubmit1: true,      // отправка формы (вариант 1)
+    formSubmit2: false,     // отправка формы (вариант 2) — оставил выключенным
+    // заготовки (выключены):
+    winBig: true,
+    winSmall: true,
+    resetCode: false,
+    limitReached: false,
+    hover: false
+  },
+
+  // ссылки на аудио (raw)
+  url: {
+    // ✅ твои звуки (исправленные ссылки)
+    wheelSpin:   'https://raw.githubusercontent.com/Vanmolotov/MLTV/main//go-new-gambling1.mp3',
+    chatMessage: 'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/massage.mp3',
+    promoFail:   'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/no%20promo.mp3',
+    spinButton:  'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/spin%20button.mp3',
+    formSubmit1: 'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/form2.mp3',
+    formSubmit2: 'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/forma1.mp3',
+
+    // ✅ заготовки под будущие звуки (пусто — вставишь сам)
+    winBig: 'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/prize.mp3',
+    winSmall: 'https://raw.githubusercontent.com/Vanmolotov/Van-Molotov/main/prize.mp3',
+    resetCode: '',
+    limitReached: '',
+    hover: ''
+  }
+};
+
+// внутренний кэш Audio
+const __SND = {};
+function getAudio(key){
+  if(!SOUND.url[key]) return null;
+  if(__SND[key]) return __SND[key];
+  const a = new Audio(SOUND.url[key]);
+  a.preload = 'auto';
+  __SND[key] = a;
+  return a;
+}
+function stopSound(key){
+  const a = __SND[key];
+  if(!a) return;
+  try{ a.pause(); a.currentTime = 0; }catch(e){}
+}
+function playSound(key, opts){
+  if(!SOUND.enabled) return;
+  if(!SOUND.use[key]) return;
+
+  const a = getAudio(key);
+  if(!a) return;
+
+  const o = opts || {};
+  try{
+    if(o.restart !== false){
+      a.currentTime = 0;
+    }
+    // на мобилках автоплей часто запрещён — но после клика по кнопке обычно ок
+    a.play().catch(()=>{});
+  }catch(e){}
+}
+function preloadSounds(){
+  // аккуратно прогреваем, но без принудительного play (чтобы не ловить блокировку)
+  Object.keys(SOUND.url).forEach(k=>{
+    if(SOUND.url[k]){
+      try{ getAudio(k); }catch(e){}
+    }
+  });
+}
+
+/* =========================================================
+  [O] PRIZES
+========================================================= */
+let wheelOption = [
+  ['#f5f5f5','СТИКЕРПАК<br><strong>MOLOTOV</strong>','https://static.tildacdn.com/tild6336-6539-4663-b265-323633666330/2.png', 5, 15],
+  ['#f5f5f5','БУТЫЛКА<br><strong>MOLOTOV</strong>','https://static.tildacdn.com/tild3637-6165-4661-b361-616661353133/11.png', 0, 0],
+  ['#f5f5f5','ШАРФ<br><strong>BASE</strong>','https://static.tildacdn.com/tild3539-3035-4537-a338-393861323963/12.png', 5, 10],
+  ['#f5f5f5','БАФФ<br><strong>MOLOTOV</strong>','https://static.tildacdn.com/tild3430-3664-4262-a661-613739663532/3.png', 5, 20],
+  ['#f5f5f5','ПОЯСНАЯ СУМКА<br><strong>BASE</strong>','https://static.tildacdn.com/tild6235-3436-4438-a431-363037623633/4.png', 5, 5],
+  ['#f5f5f5','ХУДИ<br><strong>FLEECE</strong>','https://static.tildacdn.com/tild3464-3830-4661-b165-623163643564/13.png', 3, 30],
+  ['#f5f5f5','РЮКЗАК<br><strong>BASE</strong>','https://static.tildacdn.com/tild3233-3138-4232-a434-383765373261/14.png', 3, 20],
+  ['#f5f5f5','ЛОНГСЛИВ<br><strong>BASE</strong>','https://static.tildacdn.com/tild3165-3039-4166-b037-616362366332/8.png', 4, 30],
+  ['#f5f5f5','СВИТШОТ<br><strong>BASE</strong>','https://static.tildacdn.com/tild3036-6231-4765-a131-343761616432/15.png', 3, 3],
+  ['#f5f5f5','ШАПКА<br><strong>WIDE</strong>','https://static.tildacdn.com/tild3636-3939-4031-b364-653365656539/7.png', 5, 50],
+  ['#f5f5f5','ШТАНЫ %<br><strong>RELAX</strong>','https://static.tildacdn.com/tild3432-6562-4639-b633-383532653835/16.png', 2, 10],
+  ['#f5f5f5','ХУДИ<br><strong>BASE</strong>','https://static.tildacdn.com/tild6336-6532-4637-b035-333663396337/17.png', 2, 12],
+  ['#f5f5f5','ФУТБОЛКА<br><strong>BASE</strong>','https://static.tildacdn.com/tild3036-6263-4137-a432-383365383138/9.png', 10, 15],
+  ['#f5f5f5','ХУДИ<br><strong>FLEECE MASK</strong>','https://static.tildacdn.com/tild3564-3866-4464-b764-666261396164/18.png', 2, 10],
+  ['#f5f5f5','ПОДВЕСКА<br><strong>MOLOTOV LOGO</strong>','https://static.tildacdn.com/tild3132-6337-4838-b731-353663636234/1.png', 5, 29],
+  ['#f5f5f5','КУРТКА<br><strong>BASE WARM</strong>','https://static.tildacdn.com/tild3433-3865-4262-b634-323765373833/19.png', 2, 40],
+  ['#f5f5f5','БАЛАКЛАВА<br><strong>ТРЕМОХРОМ</strong>','https://static.tildacdn.com/tild3436-3230-4436-b634-363263353863/10.png', 4, 40],
+  ['#f5f5f5','КРОССОВКИ<br><strong>MOLOTOV</strong>','https://static.tildacdn.com/tild3665-3536-4037-b136-303730393963/20.png', 2, 80],
+  ['#f5f5f5','СКЕТЧБУК<br><strong>MOLOTOV</strong>','https://static.tildacdn.com/tild3264-6230-4332-b637-363232396338/5.png', 5, 5],
+  ['#f5f5f5','НОСКИ<br><strong>BASE</strong>','https://static.tildacdn.com/tild6534-6265-4437-a436-356134633564/6.png', 5, 50],
+];
+
+/* =========================================================
+  [B] UTILS
+========================================================= */
+function isMobile(){ return window.matchMedia && window.matchMedia('(max-width: 640px)').matches; }
+function todayStr(){
+  const d=new Date(),
+        yyyy=d.getFullYear(),
+        mm=String(d.getMonth()+1).padStart(2,'0'),
+        dd=String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/* wait for Tilda blocks */
+function waitFor(selector, cb, tries=120, delay=150){
+  let t=0;
+  const timer=setInterval(()=>{
+    t++;
+    const el=document.querySelector(selector);
+    if(el){
+      clearInterval(timer);
+      cb(el);
+    }else if(t>=tries){
+      clearInterval(timer);
+      cb(null);
+    }
+  }, delay);
+}
+
+/* =========================================================
+  [C] STORAGE KEYS
+========================================================= */
+const LS_KEY_ATTEMPTS      = d=>`_wh_attempts_${d}`;
+const LS_KEY_LASTPRIZE     = d=>`_wh_last_${d}`;
+const LS_KEY_SENT          = d=>`_wh_send_${d}`;
+const LS_KEY_CHAT          = d=>`_wh_chat_${d}`;
+const LS_KEY_WELCOMED      = d=>`_wh_chat_welcome_${d}`;
+const LS_KEY_BONUS         = d=>`_wh_bonus_${d}`;
+const LS_KEY_PRIZECOUNT    = d=>`_wh_prizecount_${d}`;
+const LS_KEY_EXHAUST_SHOWN = d=>`_wh_exhaust_shown_${d}`;
+
+const LS_KEY_RESET_USED_DAILY = (d, code)=>`_wh_reset_used_${d}_${code}`;
+const LS_KEY_RESET_USED_ONCE  = (code)=>`_wh_reset_used_once_${code}`;
+const LS_KEY_SPIN_PROMO_USED  = (d, code)=>`_wh_spin_promo_used_${d}_${code}`;
+
+/* =========================================================
+  [D] ATTEMPTS / BONUS / SENT
+========================================================= */
+function getAttemptsUsed(){ return parseInt(localStorage.getItem(LS_KEY_ATTEMPTS(todayStr()))||'0',10); }
+function setAttemptsUsed(n){ localStorage.setItem(LS_KEY_ATTEMPTS(todayStr()), String(Math.max(0, n|0))); }
+function getBonusAttempts(){ return parseInt(localStorage.getItem(LS_KEY_BONUS(todayStr()))||'0',10); }
+function addBonusAttempts(n){
+  const cur = getBonusAttempts();
+  localStorage.setItem(LS_KEY_BONUS(todayStr()), String(cur + Math.max(0, n|0)));
+}
+function isFormSent(){ return localStorage.getItem(LS_KEY_SENT(todayStr())) === '1'; }
+function setFormSent(v){ localStorage.setItem(LS_KEY_SENT(todayStr()), v ? '1' : '0'); }
+
+/* =========================================================
+  [E] PRIZE COUNTS
+========================================================= */
+function getPrizeCounts(){
+  const raw = localStorage.getItem(LS_KEY_PRIZECOUNT(todayStr()));
+  const arr = raw ? JSON.parse(raw) : [];
+  return Array.isArray(arr) ? arr : [];
+}
+function savePrizeCounts(arr){ localStorage.setItem(LS_KEY_PRIZECOUNT(todayStr()), JSON.stringify(arr)); }
+function incPrizeCount(idx){
+  const arr = getPrizeCounts();
+  arr[idx] = (arr[idx] || 0) + 1;
+  savePrizeCounts(arr);
+}
+function getPrizeCount(idx){
+  const arr = getPrizeCounts();
+  return arr[idx] || 0;
+}
+
+/* =========================================================
+  [F] LIMITS
+========================================================= */
+function readMaxAttemptsFromPage(){
+  const $el=$('.wheel_max_attempts .tn-atom, [data-wheel-max], input[name="max_attempts"]');
+  if($el.length){
+    let txt=($el.val&&$el.val())||$el.text()||$el.attr('data-wheel-max');
+    let n=parseInt(String(txt||'').replace(/\D+/g,''));
+    if(!isNaN(n)&&n>=0) return n;
+  }
+  return null;
+}
+function readMaxAttemptsFromURL(){
+  const p=new URLSearchParams(location.search), a=p.get('attempts');
+  if(a!=null){
+    const n=parseInt(a,10);
+    if(!isNaN(n)&&n>=0) return n;
+  }
+  return null;
+}
+function getBaseMaxAttempts(){
+  const url=readMaxAttemptsFromURL(); if (url!=null) return url;
+  const page=readMaxAttemptsFromPage(); if (page!=null) return page;
+  const sched=ATTEMPT_SCHEDULE[todayStr()]; if (typeof sched==='number') return sched;
+  return DEFAULT_MAX_ATTEMPTS;
+}
+function resolveMaxAttempts(){ return getBaseMaxAttempts() + getBonusAttempts(); }
+function getRemainingAttempts(){ return Math.max(0, resolveMaxAttempts() - getAttemptsUsed()); }
+
+/* =========================================================
+  [G] SPIN UI + LOCK AFTER SUBMIT
+========================================================= */
+function setSpinBusy(b){ $('.spin_wheel .tn-atom').data('busy', b?1:0); }
+const SPIN_LABEL_DEFAULT = 'Крутить';
+
+function disableSpinButton(msg){
+  const $b=$('.spin_wheel .tn-atom');
+  $b.addClass('t-btn-disabled').css('pointer-events','none');
+  if(msg) $b.text(msg);
+}
+function enableSpinButton(label){
+  const $b=$('.spin_wheel .tn-atom');
+  $b.removeClass('t-btn-disabled').css('pointer-events','auto');
+  $b.text(label || SPIN_LABEL_DEFAULT);
+}
+function lockSpinEverywhereAfterSubmit(){
+  disableSpinButton(SPIN_LOCK_TEXT_PAGE);
+  const $spinChat = $('.text_win .chat-btn-spin');
+  if($spinChat.length) $spinChat.prop('disabled', true).text(SPIN_LOCK_TEXT_CHAT);
+}
+function unlockSpinEverywhere(){
+  enableSpinButton(SPIN_LABEL_DEFAULT);
+  const $spinChat = $('.text_win .chat-btn-spin');
+  if($spinChat.length) $spinChat.prop('disabled', false).text('Крутить');
+}
+function enforceAttemptLimitUI(){
+  if(isFormSent()){
+    lockSpinEverywhereAfterSubmit();
+    return false;
+  }
+  const maxA=resolveMaxAttempts(), used=getAttemptsUsed();
+  if(used>=maxA){
+    disableSpinButton('Лимит попыток на сегодня исчерпан');
+    const $spinChat = $('.text_win .chat-btn-spin');
+    if($spinChat.length) $spinChat.prop('disabled', true).text('Попытки исчерпаны');
+    return false;
+  }
+  enableSpinButton(SPIN_LABEL_DEFAULT);
+  const $spinChat = $('.text_win .chat-btn-spin');
+  if($spinChat.length) $spinChat.prop('disabled', false).text('Крутить');
+  return true;
+}
+
+/* =========================================================
+  [H] RESET PROMO LIMIT HELPERS
+========================================================= */
+function getResetLimitRule(code){
+  const c = String(code||'').toUpperCase();
+  return PROMO_RESET_LIMITS[c] || { mode:'daily', limit: 1 };
+}
+function getResetUsedCount(code){
+  const c = String(code||'').toUpperCase();
+  const rule = getResetLimitRule(c);
+  if(rule.mode === 'once'){
+    return parseInt(localStorage.getItem(LS_KEY_RESET_USED_ONCE(c))||'0',10);
+  }
+  return parseInt(localStorage.getItem(LS_KEY_RESET_USED_DAILY(todayStr(), c))||'0',10);
+}
+function incResetUsedCount(code){
+  const c = String(code||'').toUpperCase();
+  const rule = getResetLimitRule(c);
+  if(rule.mode === 'once'){
+    const cur = getResetUsedCount(c);
+    localStorage.setItem(LS_KEY_RESET_USED_ONCE(c), String(cur+1));
+    return;
+  }
+  const cur = getResetUsedCount(c);
+  localStorage.setItem(LS_KEY_RESET_USED_DAILY(todayStr(), c), String(cur+1));
+}
+
+/* =========================================================
+  [I] TILDA FORM RESET (hard)
+========================================================= */
+function resetTildaFormHard(){
+  try{
+    const $wrap = $('.wheel_form .t-form');
+    if(!$wrap.length) return;
+
+    $wrap.removeClass('js-send-form-success');
+    $wrap.find('.t-form__inputsbox').show();
+    $wrap.find('.t-form__successbox').hide();
+
+    $wrap.find('input, textarea, select').each(function(){
+      const $i = $(this);
+      const type = ($i.attr('type')||'').toLowerCase();
+      if(type === 'checkbox' || type === 'radio') $i.prop('checked', false);
+      else $i.val('');
+    });
+
+    $wrap.find('.t-submit').prop('disabled', false).show();
+  }catch(e){}
+}
+
+/* =========================================================
+  [J] FORM LOCKING
+========================================================= */
+function lockFormUntilFirstSpin(){
+  $('.wheel_form').addClass('form_noactive');
+  $('.wheel_form button').attr('type','button');
+}
+function unlockFormAfterSpin(){
+  $('.wheel_form').removeClass('form_noactive');
+  $('.wheel_form button').attr('type','submit');
+}
+function lockFormAfterSubmitHard(){
+  $('.wheel_form').addClass('form_noactive');
+  $('.wheel_form button').attr('type','button');
+}
+
+/* =========================================================
+  [K] CHAT (UNPINNED)
+========================================================= */
+function ensureChatMount(){
+  if($('.wh-chat-mount').length) return $('.wh-chat-mount');
+
+  const $mount = $('<div class="wh-chat-mount"></div>');
+  const $wfRec = $('.wheelfortune').closest('.t-rec');
+
+  if($wfRec.length) $mount.insertAfter($wfRec);
+  else $('body').append($mount);
+
+  return $mount;
+}
+
+function chatInit(){
+  let $dlg = $('.text_win');
+  if(!$dlg.length){
+    const $mount = ensureChatMount();
+    $mount.append('<div class="text_win"></div>');
+    $dlg = $('.text_win');
+  }
+  if(!$dlg.hasClass('chat-ready')){
+    $dlg.addClass('chat-ready').html(`
+      <div class="chat-head"></div>
+      <div class="chat-body"></div>
+      <div class="chat-foot">
+        <div class="chat-promo">
+          <input class="chat-promo__input" type="text" placeholder="Промо-код" autocomplete="off">
+          <button type="button" class="chat-promo__btn">Активировать</button>
+        </div>
+        <button type="button" class="btn btn-spin chat-btn-spin">Крутить</button>
+      </div>
+    `);
+  }
+}
+
+function markTypingState(){
+  const $b = $('.text_win .chat-body');
+  if($b.find('.chat-typing-wrap').length) $b.addClass('has-typing');
+  else $b.removeClass('has-typing');
+}
+
+/* ✅ FIX: НЕ сохраняем typing-wrap в localStorage */
+function chatSave(){
+  const day=todayStr(), msgs=[];
+  $('.text_win .chat-body .chat-msg').each(function(){
+    msgs.push({ html: $(this).html(), cls: this.className });
+  });
+  localStorage.setItem(LS_KEY_CHAT(day), JSON.stringify(msgs));
+}
+
+/* ✅ FIX: при загрузке чистим случайные typing-wrap от старых версий */
+function chatLoad(){
+  const raw=localStorage.getItem(LS_KEY_CHAT(todayStr()));
+  const $b=$('.text_win .chat-body');
+  $b.empty();
+
+  if(!raw){
+    markTypingState();
+    return;
+  }
+
+  const arr=JSON.parse(raw||'[]');
+  arr.forEach(m=> $b.append(`<div class="${m.cls}">${m.html}</div>`));
+
+  $b.find('.chat-typing-wrap').remove(); // на всякий
+  $b.scrollTop($b[0].scrollHeight);
+  markTypingState();
+}
+
+function chatPushAfterTyping(html, variant='agent', typingMs=TYPING_MS, fadeMs=FADE_MS, extraClass=''){
+  chatInit();
+  const $b=$('.text_win .chat-body');
+
+  /* ✅ FIX: если остался старый typing — убираем (это и давало дубль на мобилке) */
+  $b.find('.chat-typing-wrap').remove();
+  $b.removeClass('has-typing');
+
+  const $wrap = $(`<div class="chat-typing-wrap"></div>`);
+  const $typing = $(`<div class="chat-msg ${variant}"><span class="chat-typing"><span>печатает</span><span class="chat-dot"></span><span class="chat-dot"></span><span class="chat-dot"></span></span></div>`);
+  $wrap.append($typing);
+  $b.append($wrap);
+
+  $b.scrollTop($b[0].scrollHeight);
+  markTypingState();
+  chatSave();
+
+  setTimeout(()=>{
+    $typing.remove();
+    const cls = `chat-msg ${variant} fadein ${extraClass||''}`.trim();
+    const $msg = $(`<div class="${cls}" style="--fade-ms:${fadeMs}ms">${html}</div>`);
+    $wrap.replaceWith($msg);
+
+    // звук сообщения (после появления сообщения)
+    playSound('chatMessage');
+
+    $b.scrollTop($b[0].scrollHeight);
+    markTypingState();
+    chatSave();
+  }, Math.max(0, typingMs));
+}
+
+function chatSetFooter(mode='welcome'){
+  const $spin=$('.text_win .chat-btn-spin');
+  if(mode==='welcome') $spin.prop('disabled',false).text('Крутить');
+  else if(mode==='result') $spin.prop('disabled',false).text('Крутить ещё');
+  else if(mode==='exhausted') $spin.prop('disabled',true).text('Попытки исчерпаны');
+}
+
+function showAttemptsExhaustedMessages(force=false){
+  const shown = localStorage.getItem(LS_KEY_EXHAUST_SHOWN(todayStr())) === '1';
+  if(shown && !force) return;
+
+  chatPushAfterTyping('оу, сорян — <b>попытки на сегодня закончились</b>. если у тебя есть промокод — <b>вводи его</b>.', 'agent warn', TYPING_MS, FADE_MS);
+
+  setTimeout(()=>{
+    chatPushAfterTyping(
+      `если нужен промокод — выполни несколько заданий и возвращайся: <a href="${TASKS_URL}" target="_blank" rel="noopener">задания тут</a>`,
+      'agent decide',
+      TYPING_MS,
+      FADE_MS
+    );
+
+    localStorage.setItem(LS_KEY_EXHAUST_SHOWN(todayStr()), '1');
+
+    setTimeout(()=>{
+      const $inp = $('.text_win .chat-promo__input');
+      if($inp.length && isMobile()) $inp.focus();
+    }, 250);
+  }, TYPING_MS + 250);
+
+  chatSetFooter('exhausted');
+}
+
+/* chat spin */
+$(document).on('click','.chat-btn-spin', function(e){
+  e.preventDefault();
+  if(isFormSent()) return;
+
+  // звук нажатия
+  playSound('spinButton');
+
+  if(enforceAttemptLimitUI()){
+    $('.spin_wheel .tn-atom').trigger('click');
+  }else{
+    showAttemptsExhaustedMessages(true);
+  }
+});
+
+/* =========================================================
+  [N] CHAT TEXTS
+========================================================= */
+const chatWelcome1='Привет! на связи Саня Молотов — мы приготовили Годные бонусы.';
+const chatWelcome2='Нажми «крутить» ниже и смотри, что выпадет. удачи!';
+const DECISION_LINES=[
+  'Что делаем: фиксируем приз или крутим ещё?',
+  'Берёшь сейчас или пробуем выбить что-то жирнее?',
+  'Забираем выигрыш или ещё один спин?',
+  'Оставляем этот трофей или рискуем дальше?'
+];
+function getWinChat(htmlText){
+  const plain=String(htmlText||'').replace(/<\/?[^>]+>/g,' ').trim();
+  return `Ты выбил <b>${plain}</b>! помни выбрав данынй бонус, откатиться обратно не получится!`;
+}
+
+/* =========================================================
+  [WEIGHTS + LIMITS]
+========================================================= */
+function getWeightsFromOptions(){
+  return wheelOption.map(r=> (typeof r[3]==='number' && r[3]>=0) ? r[3] : 1 );
+}
+function resolveWeights(){
+  const p=new URLSearchParams(location.search), wStr=p.get('weights');
+  if(wStr){
+    const arr=wStr.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x)&&x>=0);
+    if(arr.length===wheelOption.length) return arr;
+  }
+  const fromOpt=getWeightsFromOptions();
+  if(fromOpt.some(w=>w!==1)) return fromOpt;
+  return new Array(wheelOption.length).fill(1);
+}
+function pickWeightedIndex(ws){
+  const sum=ws.reduce((a,b)=>a+b,0);
+  if(sum<=0) return Math.floor(Math.random()*ws.length);
+  let r=Math.random()*sum;
+  for(let i=0;i<ws.length;i++){ r-=ws[i]; if(r<0) return i; }
+  return ws.length-1;
+}
+function getDailyLimit(idx){
+  const lim = wheelOption[idx]?.[4];
+  return (typeof lim === 'number' && lim >= 0) ? lim : Infinity;
+}
+function resolveWeightsWithLimits(baseWeights){
+  const ws = baseWeights.slice();
+  for(let i=0;i<ws.length;i++){
+    const lim = getDailyLimit(i);
+    if(lim !== Infinity && getPrizeCount(i) >= lim) ws[i] = 0;
+  }
+  return ws;
+}
+const __weightsBase = resolveWeights();
+
+/* =========================================================
+  [P] WHEEL RENDER + ANIMATION
+========================================================= */
+let sector=wheelOption.length;
+let spinFinish=false, finalSector=-1, resizeTxt='';
+
+const SPIN_LOOPS_MIN=8, SPIN_LOOPS_MAX=14, RENDER_REPEATS=16;
+function pickLoops(){ return Math.floor(Math.random()*(SPIN_LOOPS_MAX-SPIN_LOOPS_MIN+1))+SPIN_LOOPS_MIN; }
+
+function mountWheel(){
+  if(document.querySelector('.wheelfortune .wheel_wrp')) return;
+  $('.wheelfortune').append('<div class="wheel_wrp"><div class="wheel_reel"></div></div>');
+  $('.wheelfortune').html($('.wheel_wrp'));
+}
+
+function renderReel(){
+  sector = wheelOption.length;
+  const $reel=$('.wheel_reel');
+  if(!$reel.length) return;
+
+  $reel.empty();
+
+  function chunkHtml(){
+    return wheelOption.map(([bg, html, img])=>`
+      <div class="wheel_item" data-bg style="${USE_OPTION_BG ? `background:${bg} !important;` : ``}">
+        <img loading="lazy" src="${img}" alt="">
+        <div class="wheel_lbl">${html}</div>
+      </div>`).join('');
+  }
+
+  let html='';
+  for(let i=0;i<RENDER_REPEATS;i++) html+=chunkHtml();
+  $reel.html(html);
+  $reel.css({ transform:'translateX(0px)', transition:'none' });
+
+  const firstItem=$reel.children('.wheel_item').get(0);
+  if(!firstItem) return;
+
+  const itemRect=firstItem.getBoundingClientRect();
+  const reelStyles=getComputedStyle($reel.get(0));
+  const gapPx=parseFloat(reelStyles.columnGap || reelStyles.gap || 16);
+  const padLeft=parseFloat(reelStyles.paddingLeft || 0);
+
+  $reel.data('__step', itemRect.width + gapPx);
+  $reel.data('__padLeft', padLeft);
+
+  prepareSpin();
+}
+function targetTranslateX(finalIndex, loopsCount){
+  const $wrp=$('.wheel_wrp'), $reel=$('.wheel_reel');
+  const viewport=$wrp.width(), centerX=viewport/2;
+  const step=Number($reel.data('__step')) || 160;
+  const padLeft=Number($reel.data('__padLeft')) || (viewport*0.48);
+
+  const travelSteps=loopsCount*sector + finalIndex + 0.5;
+  const distance=travelSteps*step;
+  return -(distance - (centerX - padLeft));
+}
+function setReelInstantToIndex(index){
+  const x=targetTranslateX(index,0);
+  $('.wheel_reel').css({ transition:'none', transform:`translateX(${x}px)` });
+}
+function spinWheelToIndex(index, loopsCount){
+  const x=targetTranslateX(index,loopsCount);
+  $('.wheel_reel').css({
+    transition:`transform ${spinTime}s ${SPIN_EASE}`,
+    transform:`translateX(${x}px)`
+  });
+}
+function prepareSpin(){
+  const $r=$('.wheel_reel');
+  $r.css({transition:'none', transform:'translateX(0px)'});
+  if($r.get(0)) void $r.get(0).offsetHeight;
+}
+
+function finalStep(prizTxt, prizeImg){
+  $('.present_text .tn-atom').html(prizTxt);
+  $('.present_img img').attr({'data-original':prizeImg,'src':prizeImg});
+  setTimeout(function(){
+    resizeTxt = String(prizTxt||'').replace(/<\/?[^>]+>/g,' ').trim();
+    $('input[name="sector_prize"]').val(resizeTxt);
+  }, 250);
+}
+
+/* =========================================================
+  [R] RESET ENGINE
+========================================================= */
+function resetAllForToday(opts){
+  const o = Object.assign({ keepSentFlag:false, clearChat:false, resetTildaForm:true }, opts || {});
+  const d = todayStr();
+
+  localStorage.removeItem(LS_KEY_ATTEMPTS(d));
+  localStorage.removeItem(LS_KEY_BONUS(d));
+  localStorage.removeItem(LS_KEY_LASTPRIZE(d));
+  localStorage.removeItem(LS_KEY_PRIZECOUNT(d));
+  localStorage.removeItem(LS_KEY_EXHAUST_SHOWN(d));
+  if(!o.keepSentFlag) localStorage.removeItem(LS_KEY_SENT(d));
+
+  if(o.clearChat){
+    localStorage.removeItem(LS_KEY_CHAT(d));
+    $('.text_win .chat-body').empty();
+  }
+
+  spinFinish=false;
+  finalSector=-1;
+  resizeTxt='';
+
+  $('input[name="sector_prize"]').val('');
+  lockFormUntilFirstSpin();
+
+  if(o.resetTildaForm) resetTildaFormHard();
+
+  setFormSent(false);
+  unlockSpinEverywhere();
+  enforceAttemptLimitUI();
+  chatSetFooter('welcome');
+
+  if($('.present_text .tn-atom').length){
+    $('.present_text .tn-atom').html('Чит обнуления активирован. Крути заново.');
+  }
+}
+
+/* =========================================================
+  [SUBMIT]
+========================================================= */
+function setPrizeFieldAfterSubmit(){
+  if($('.present_text .tn-atom').length){
+    $('.present_text .tn-atom').html('<b>Твой бонус улетел к нам в базу.</b><br>Скоро с тобой свяжется менеджер.');
+  }
+}
+function pushSuccessMessage(){
+  chatPushAfterTyping('Принял. заявка ушла — скоро свяжемся и всё оформим.', 'agent info', TYPING_MS, FADE_MS);
+}
+function pushAlreadySentMessage(){
+  chatPushAfterTyping('Заявка уже отправлена. Если хочешь сыграть заново — нужен <b>Чит-код обнулени</b>.', 'agent warn', TYPING_MS, FADE_MS);
+}
+
+$(document).on('click', '.wheel_form .t-submit', function(e){
+  if(isFormSent()){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    pushAlreadySentMessage();
+    setPrizeFieldAfterSubmit();
+    lockSpinEverywhereAfterSubmit();
+    return false;
+  }
+});
+
+$('.wheel_form').delegate(".t-submit", "click", function(){
+  setTimeout(function(){
+    if ($('.wheel_form .t-form').hasClass("js-send-form-success")){
+      setFormSent(true);
+      lockFormAfterSubmitHard();
+      setPrizeFieldAfterSubmit();
+      pushSuccessMessage();
+      lockSpinEverywhereAfterSubmit();
+
+      // звук отправки формы (выбирай какой вариант включить)
+      if(SOUND.use.formSubmit2) playSound('formSubmit2'); else playSound('formSubmit1');
+
+      if(SHOW_ALREADY_SENT_AFTER_SUCCESS){
+        setTimeout(()=> pushAlreadySentMessage(), TYPING_MS + 250);
+      }
+      if(SHOW_EXHAUST_AFTER_SUBMIT){
+        setTimeout(()=> showAttemptsExhaustedMessages(true), 450);
+      }
+    }
+  }, 1000);
+});
+
+/* =========================================================
+  [PROMO]
+========================================================= */
+function applyPromoCode(raw){
+  const code = String(raw||'').trim().toUpperCase();
+  if(!code){
+    chatPushAfterTyping('Введи код и нажми «Активировать».','agent decide', TYPING_MS, FADE_MS);
+    return;
+  }
+
+  if(PROMO_RESET_CODES[code]){
+    const rule = getResetLimitRule(code);
+    const usedCnt = getResetUsedCount(code);
+    const lim = (rule && typeof rule.limit === 'number') ? rule.limit : 1;
+
+    if(usedCnt >= lim){
+      const txt = (rule.mode === 'once')
+        ? 'этот Чит-код уже использован. он одноразовый.'
+        : 'Чит-код уже использован сегодня. попробуй завтра.';
+      chatPushAfterTyping(txt, 'agent warn', TYPING_MS, FADE_MS);
+      return;
+    }
+
+    incResetUsedCount(code);
+
+    resetAllForToday({
+      keepSentFlag: false,
+      clearChat: false,
+      resetTildaForm: true
+    });
+
+    const left = Math.max(0, lim - (usedCnt + 1));
+    const leftTxt = (rule.mode === 'once') ? '' : `<br><span style="opacity:.85">осталось обнулений сегодня: ${left}</span>`;
+
+    // заготовка под звук reset (выключено)
+    playSound('resetCode');
+
+    chatPushAfterTyping('Чит-код принят. Рулетка и форма сброшены — можно крутить заново.' + leftTxt, 'agent info', TYPING_MS, FADE_MS);
+    return;
+  }
+
+  const bonus = PROMO_SPIN_CODES[code];
+  if(!bonus || bonus <= 0){
+    // звук неверного промо
+    playSound('promoFail');
+    chatPushAfterTyping('Код не подходит. Проверь написание и попробуй ещё раз.','agent warn', TYPING_MS, FADE_MS);
+    return;
+  }
+
+  const usedKey = LS_KEY_SPIN_PROMO_USED(todayStr(), code);
+  if(localStorage.getItem(usedKey)){
+    // звук неверного промо (по желанию)
+    playSound('promoFail');
+    chatPushAfterTyping('Этот код уже активирован сегодня.','agent warn', TYPING_MS, FADE_MS);
+    return;
+  }
+
+  addBonusAttempts(bonus);
+  localStorage.setItem(usedKey,'1');
+
+  enforceAttemptLimitUI();
+  chatPushAfterTyping(`Код принят: <b>+${bonus}</b> попыт${bonus===1?'ка':'ок'} на сегодня! удачи!`,'agent info', TYPING_MS, FADE_MS);
+
+  setTimeout(()=>{
+    if(isFormSent()) return;
+    if (getRemainingAttempts() > 0) { $('.spin_wheel .tn-atom').trigger('click'); }
+  }, 700);
+}
+
+$(document).on('click','.lotto-pass__btn', function(){
+  const val=$('.passport .lotto-pass__input').val();
+  applyPromoCode(val);
+});
+$(document).on('keydown','.passport .lotto-pass__input', function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    $('.lotto-pass__btn').trigger('click');
+  }
+});
+$(document).on('click','.chat-promo__btn', function(){
+  if(!isMobile()) return;
+  const val = $('.text_win .chat-promo__input').val();
+  applyPromoCode(val);
+  $('.text_win .chat-promo__input').val('');
+});
+$(document).on('keydown','.text_win .chat-promo__input', function(e){
+  if(!isMobile()) return;
+  if(e.key==='Enter'){
+    e.preventDefault();
+    $('.chat-promo__btn').trigger('click');
+  }
+});
+
+/* =========================================================
+  [SPIN]
+========================================================= */
+$('.spin_wheel .tn-atom').on('click', function(){
+  if ($(this).data('busy')) return;
+  if(isFormSent()){
+    lockSpinEverywhereAfterSubmit();
+    return;
+  }
+
+  // звук нажатия
+  playSound('spinButton');
+
+  const maxA=resolveMaxAttempts(), used=getAttemptsUsed();
+  if (used >= maxA){
+    enforceAttemptLimitUI();
+    playSound('limitReached'); // заготовка (выкл)
+    showAttemptsExhaustedMessages(true);
+    return;
+  }
+
+  setSpinBusy(true);
+  prepareSpin();
+
+  const wsLimited = resolveWeightsWithLimits(__weightsBase);
+  const sumLimited = wsLimited.reduce((a,b)=>a+b,0);
+  finalSector = (sumLimited > 0) ? pickWeightedIndex(wsLimited) : pickWeightedIndex(__weightsBase);
+
+  const loopsNow = pickLoops();
+
+  // старт звука рулетки (9 сек)
+  playSound('wheelSpin');
+
+  spinWheelToIndex(finalSector, loopsNow);
+
+  setTimeout(function(){
+    let prizTxt=wheelOption[finalSector][1], prizeImg=wheelOption[finalSector][2];
+    spinFinish=true;
+
+    if(!isFormSent()) unlockFormAfterSpin();
+
+    finalStep('Твой подгон:<br>'+prizTxt, prizeImg);
+    incPrizeCount(finalSector);
+
+    chatPushAfterTyping(getWinChat(prizTxt), 'agent info', TYPING_MS, FADE_MS, 'prize-neon');
+
+    const finalResult={ text:prizTxt, img:prizeImg, sect:finalSector };
+    localStorage.setItem(LS_KEY_LASTPRIZE(todayStr()), JSON.stringify(finalResult));
+    setAttemptsUsed(used + 1);
+
+    const remaining = getRemainingAttempts();
+
+    setTimeout(()=>{
+      if (remaining <= 0){
+        showAttemptsExhaustedMessages(true);
+      } else {
+        const line = DECISION_LINES[Math.floor(Math.random()*DECISION_LINES.length)];
+        const lineWithRemaining =
+          `${line}<br><span style="opacity:.85">осталось попыток сегодня: <b>${remaining}</b></span>`;
+        chatPushAfterTyping(lineWithRemaining, 'agent decide', TYPING_MS, FADE_MS);
+        chatSetFooter('result');
+      }
+    }, TYPING_MS + GAP_AFTER_FIRST_MSG);
+
+    enforceAttemptLimitUI();
+    setSpinBusy(false);
+  }, spinTime*1000);
+});
+
+/* =========================================================
+  [INIT AFTER TILDA READY]
+========================================================= */
+waitFor('.wheelfortune', function(){
+  // прогреваем аудио
+  preloadSounds();
+
+  // wheel
+  mountWheel();
+  renderReel();
+
+  // chat + restore
+  const prevListRaw=localStorage.getItem(LS_KEY_LASTPRIZE(todayStr()));
+  const prevList=prevListRaw?JSON.parse(prevListRaw):null;
+
+  chatInit();
+  chatLoad();
+
+  let welcomed = !!localStorage.getItem(LS_KEY_WELCOMED(todayStr()));
+  if(!welcomed){
+    chatPushAfterTyping(chatWelcome1, 'agent decide', TYPING_MS, FADE_MS);
+    setTimeout(()=> chatPushAfterTyping(chatWelcome2, 'agent decide', TYPING_MS, FADE_MS), TYPING_MS + 250);
+    localStorage.setItem(LS_KEY_WELCOMED(todayStr()),'1');
+    welcomed = true;
+  }
+
+  if ($('.passport').length && !$('.passport .lotto-pass__input').length){
+    $('.passport').html(
+      '<input class="lotto-pass__input" type="text" placeholder="Промо-код">'+
+      '<button class="lotto-pass__btn" type="button">Активировать</button>'
+    );
+  }
+
+  if(prevList){
+    spinFinish=true;
+    finalSector = prevList.sect;
+    finalStep('<u>Твой прошлый бонус</u><br>'+prevList.text, prevList.img);
+    setTimeout(()=> setReelInstantToIndex(prevList.sect), 50);
+  }
+
+  if(isFormSent()){
+    lockFormAfterSubmitHard();
+    lockSpinEverywhereAfterSubmit();
+  }else{
+    if(prevList) unlockFormAfterSpin();
+    else lockFormUntilFirstSpin();
+  }
+
+  if(isFormSent()) lockSpinEverywhereAfterSubmit();
+  else{
+    enforceAttemptLimitUI();
+    if(!enforceAttemptLimitUI()) setTimeout(()=> showAttemptsExhaustedMessages(false), 350);
+    else chatSetFooter('welcome');
+  }
+
+  markTypingState();
+}, 140, 150);
+
+/* resize */
+$(window).on('resize', function(){
+  clearTimeout(window.__wh_resize);
+  window.__wh_resize = setTimeout(function(){
+    renderReel();
+    if(finalSector>=0) setReelInstantToIndex(finalSector);
+  }, 200);
+
+  markTypingState();
+});
+
+});
+</script>
